@@ -2,6 +2,8 @@ export interface OrderItem {
   product_id: number;
   name: string;
   price: number;
+  quantity: number;
+  size: string | null;
 }
 
 export interface CreateOrderRequest {

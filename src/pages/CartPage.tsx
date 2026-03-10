@@ -1,17 +1,24 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
-import { ShoppingBag, ExternalLink } from 'lucide-react';
+import { ShoppingBag, ExternalLink, Loader2 } from 'lucide-react';
 import { useCartStore } from '../stores/cartStore';
 import { useAuthStore } from '../stores/authStore';
-import { autoCreateOrder, getPaymentLink } from '../api/orders';
+import { checkoutFromCart, getPaymentLink } from '../api/orders';
 import CartItem from '../components/cart/CartItem';
 
 export default function CartPage() {
-  const { items, totalAmount, clear } = useCartStore();
+  const { items, isLoading, fetchCart, totalAmount } = useCartStore();
   const user = useAuthStore((s) => s.user);
   const [checkoutState, setCheckoutState] = useState<'idle' | 'loading' | 'done'>('idle');
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Load cart from backend whenever user is available
+  useEffect(() => {
+    if (user) {
+      fetchCart(user.id);
+    }
+  }, [user, fetchCart]);
 
   const handleCheckout = async () => {
     if (!user) return;
@@ -19,13 +26,13 @@ export default function CartPage() {
     setError(null);
 
     try {
-      const productIds = items.map((i) => i.product.id);
-      const order = await autoCreateOrder({ user_id: user.id, product_ids: productIds });
-
+      // Create order from cart (backend clears cart on success)
+      const order = await checkoutFromCart(user.id);
       const payment = await getPaymentLink(order.id);
       setPaymentUrl(payment.payment_url);
       setCheckoutState('done');
-      clear();
+      // Refresh local cart state (should be empty now)
+      await fetchCart(user.id);
     } catch {
       setError('Failed to create order. Please try again.');
       setCheckoutState('idle');
@@ -55,6 +62,28 @@ export default function CartPage() {
     );
   }
 
+  if (isLoading) {
+    return (
+      <div className="max-w-2xl mx-auto px-6 py-16 text-center">
+        <Loader2 size={32} className="mx-auto text-gold animate-spin mb-4" />
+        <p className="text-text-secondary">Loading cart...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="max-w-2xl mx-auto px-6 py-16 text-center">
+        <ShoppingBag size={48} className="mx-auto text-text-secondary mb-4" />
+        <h2 className="font-heading text-2xl text-text-primary mb-2">Please sign in</h2>
+        <p className="text-text-secondary mb-6">Sign in to view and manage your cart.</p>
+        <Link to="/login" className="inline-flex items-center gap-2 bg-gold text-bg px-6 py-3 rounded-lg font-medium hover:bg-gold-light transition-colors">
+          Sign In
+        </Link>
+      </div>
+    );
+  }
+
   if (items.length === 0) {
     return (
       <div className="max-w-2xl mx-auto px-6 py-16 text-center">
@@ -74,7 +103,7 @@ export default function CartPage() {
 
       <div className="mb-8">
         {items.map((item) => (
-          <CartItem key={item.product.id} item={item} />
+          <CartItem key={item.id} item={item} />
         ))}
       </div>
 
@@ -87,23 +116,19 @@ export default function CartPage() {
 
         {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
 
-        {user ? (
-          <button
-            onClick={handleCheckout}
-            disabled={checkoutState === 'loading'}
-            className="w-full bg-gold text-bg py-3 rounded-lg font-medium hover:bg-gold-light transition-colors disabled:opacity-50"
-          >
-            {checkoutState === 'loading' ? 'Processing...' : 'Checkout'}
-          </button>
-        ) : (
-          <div className="text-center">
-            <p className="text-text-secondary text-sm mb-3">Please login to checkout</p>
-            <Link to="/login" className="inline-block bg-gold text-bg px-6 py-3 rounded-lg font-medium hover:bg-gold-light transition-colors">
-              Login
-            </Link>
-          </div>
-        )}
+        <button
+          onClick={handleCheckout}
+          disabled={checkoutState === 'loading'}
+          className="w-full bg-gold text-bg py-3 rounded-lg font-medium hover:bg-gold-light transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+        >
+          {checkoutState === 'loading' ? (
+            <><Loader2 size={18} className="animate-spin" /> Processing...</>
+          ) : (
+            'Checkout'
+          )}
+        </button>
       </div>
     </div>
   );
 }
+

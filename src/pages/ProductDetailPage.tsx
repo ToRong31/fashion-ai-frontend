@@ -1,16 +1,22 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router';
-import { ArrowLeft, ShoppingBag, Check } from 'lucide-react';
+import { useParams, Link, useNavigate } from 'react-router';
+import { ArrowLeft, ShoppingBag, Check, Minus, Plus } from 'lucide-react';
 import { getProduct } from '../api/products';
 import { useCartStore } from '../stores/cartStore';
+import { useAuthStore } from '../stores/authStore';
 import type { Product } from '../types/product';
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
   const addItem = useCartStore((s) => s.addItem);
+  const user = useAuthStore((s) => s.user);
 
   useEffect(() => {
     if (!id) return;
@@ -20,11 +26,30 @@ export default function ProductDetailPage() {
     }).catch(() => setLoading(false));
   }, [id]);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!product) return;
-    addItem(product);
-    setAdded(true);
-    setTimeout(() => setAdded(false), 2000);
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    const sizes = product.metadata?.sizes_available ?? [];
+    if (sizes.length > 0 && !selectedSize) {
+      setAddError('Please select a size.');
+      return;
+    }
+    setAddError(null);
+    try {
+      await addItem({
+        user_id: user.id,
+        product_id: product.id,
+        size: selectedSize,
+        quantity,
+      });
+      setAdded(true);
+      setTimeout(() => setAdded(false), 2000);
+    } catch {
+      setAddError('Failed to add item to cart. Please try again.');
+    }
   };
 
   if (loading) {
@@ -41,6 +66,7 @@ export default function ProductDetailPage() {
   }
 
   const meta = product.metadata;
+  const sizes = meta?.sizes_available ?? [];
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-10">
@@ -91,24 +117,56 @@ export default function ProductDetailPage() {
             </div>
           )}
 
-          {/* Sizes */}
-          {meta?.sizes_available && meta.sizes_available.length > 0 && (
-            <div className="mb-8">
-              <p className="text-text-secondary text-xs uppercase mb-2">Available Sizes</p>
-              <div className="flex gap-2">
-                {meta.sizes_available.map((size) => (
-                  <span key={size} className="w-10 h-10 rounded border border-border flex items-center justify-center text-sm text-text-primary hover:border-gold/40 cursor-pointer transition-colors">
+          {/* Size selector */}
+          {sizes.length > 0 && (
+            <div className="mb-6">
+              <p className="text-text-secondary text-xs uppercase tracking-wider mb-2">
+                Select Size {selectedSize && <span className="text-gold normal-case">— {selectedSize}</span>}
+              </p>
+              <div className="flex gap-2 flex-wrap">
+                {sizes.map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => setSelectedSize(size)}
+                    className={`w-11 h-11 rounded border text-sm font-medium transition-colors ${
+                      selectedSize === size
+                        ? 'border-gold bg-gold/10 text-gold'
+                        : 'border-border text-text-primary hover:border-gold/40'
+                    }`}
+                  >
                     {size}
-                  </span>
+                  </button>
                 ))}
               </div>
             </div>
           )}
 
+          {/* Quantity selector */}
+          <div className="mb-6">
+            <p className="text-text-secondary text-xs uppercase tracking-wider mb-2">Quantity</p>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                className="w-9 h-9 rounded border border-border flex items-center justify-center text-text-secondary hover:text-text-primary hover:border-gold/40 transition-colors"
+              >
+                <Minus size={14} />
+              </button>
+              <span className="text-text-primary text-base w-8 text-center font-medium">{quantity}</span>
+              <button
+                onClick={() => setQuantity((q) => q + 1)}
+                className="w-9 h-9 rounded border border-border flex items-center justify-center text-text-secondary hover:text-text-primary hover:border-gold/40 transition-colors"
+              >
+                <Plus size={14} />
+              </button>
+            </div>
+          </div>
+
           {/* Stock */}
           <p className="text-text-secondary text-xs mb-4">
             {product.stock_quantity > 0 ? `${product.stock_quantity} in stock` : 'Out of stock'}
           </p>
+
+          {addError && <p className="text-red-400 text-sm mb-3">{addError}</p>}
 
           {/* Add to cart */}
           <button
@@ -117,17 +175,22 @@ export default function ProductDetailPage() {
             className="w-full bg-gold text-bg py-3 rounded-lg font-medium flex items-center justify-center gap-2 hover:bg-gold-light transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {added ? (
-              <>
-                <Check size={18} /> Added to Cart
-              </>
+              <><Check size={18} /> Added to Cart</>
             ) : (
-              <>
-                <ShoppingBag size={18} /> Add to Cart
-              </>
+              <><ShoppingBag size={18} /> Add to Cart</>
             )}
           </button>
+
+          {!user && (
+            <p className="text-text-secondary text-xs text-center mt-2">
+              You need to{' '}
+              <Link to="/login" className="text-gold hover:text-gold-light">sign in</Link>
+              {' '}to add items to cart.
+            </p>
+          )}
         </div>
       </div>
     </div>
   );
 }
+

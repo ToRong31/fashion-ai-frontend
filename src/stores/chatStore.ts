@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import type { ChatMessage } from '../types/chat';
 import * as chatApi from '../api/chat';
 import { useCartStore } from './cartStore';
-import type { Product } from '../types/product';
+import { useAuthStore } from './authStore';
 
 interface ChatState {
   messages: ChatMessage[];
@@ -32,18 +32,17 @@ export const useChatStore = create<ChatState>()((set, get) => ({
     try {
       const res = await chatApi.sendMessage({ user_id: userId, message });
 
-      // Handle add_to_cart action from AI
+      // Handle add_to_cart action from AI agent
       if (res.data?.action === 'add_to_cart' && res.data?.cart_item) {
         const item = res.data.cart_item as { product_id: number; product_name: string; price: number };
-        const product: Product = {
-          id: item.product_id,
-          name: item.product_name,
-          description: '',
-          price: item.price,
-          stock_quantity: 99,
-          metadata: null,
-        };
-        useCartStore.getState().addItem(product);
+        const authUser = useAuthStore.getState().user;
+        if (authUser) {
+          await useCartStore.getState().addItem({
+            user_id: authUser.id,
+            product_id: item.product_id,
+            quantity: 1,
+          });
+        }
       }
 
       const assistantMsg: ChatMessage = {
