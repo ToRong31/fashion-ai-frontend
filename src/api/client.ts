@@ -17,3 +17,12 @@ export const orchesApi = axios.create({
   baseURL: import.meta.env.VITE_ORCHES_URL || 'http://localhost:8000',
   headers: { 'Content-Type': 'application/json' },
 });
+
+// Add JWT token to orchestrator requests for authenticated backend calls
+orchesApi.interceptors.request.use((config) => {
+  const token = localStorage.getItem('auth-token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
