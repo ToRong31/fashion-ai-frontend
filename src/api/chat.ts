@@ -6,7 +6,15 @@ export async function sendMessage(req: ChatRequest): Promise<ChatResponse> {
   return data;
 }
 
-export async function getConversationHistory(userId: string): Promise<{ history: { role: string; content: string }[] }> {
-  const { data } = await orchesApi.get<{ history: { role: string; content: string }[] }>(`/conversation/${userId}`);
+export interface ChatHistoryItem {
+  role: string;
+  content: string;
+  products?: Record<string, unknown>[];
+  cart_items?: Record<string, unknown>[];
+  orders?: Record<string, unknown>[];
+}
+
+export async function getConversationHistory(userId: string): Promise<{ history: ChatHistoryItem[] }> {
+  const { data } = await orchesApi.get<{ history: ChatHistoryItem[] }>(`/conversation/${userId}`);
   return data;
 }
