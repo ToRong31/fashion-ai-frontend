@@ -24,8 +24,8 @@ const COLOR_GRADIENTS: Record<string, string> = {
 };
 
 function getGradient(color?: string): string {
-  if (!color) return 'from-gray-800 to-gray-600';
-  return COLOR_GRADIENTS[color.toLowerCase()] ?? 'from-gray-800 to-gray-600';
+  if (!color) return 'from-stone-300 to-stone-200';
+  return COLOR_GRADIENTS[color.toLowerCase()] ?? 'from-stone-300 to-stone-200';
 }
 
 interface ProductCardProps {
@@ -38,17 +38,21 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link to={`/products/${product.id}`} className="group block">
-      <div className="bg-surface rounded-lg border border-border overflow-hidden hover:border-gold/40 transition-all duration-300">
-        <div className={`aspect-[3/4] bg-gradient-to-br ${gradient} flex items-end p-4`}>
-          <span className="text-white/60 text-xs uppercase tracking-widest">
+      <div className="bg-surface rounded-2xl border border-border overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-[0_14px_30px_-10px_rgba(60,40,20,0.22)]">
+        <div className="relative aspect-[3/4] overflow-hidden">
+          <div
+            className={`absolute inset-0 bg-gradient-to-br ${gradient} transition-transform duration-500 group-hover:scale-105`}
+          />
+          <div className="absolute inset-0 ring-1 ring-inset ring-black/5" />
+          <span className="absolute top-3 left-3 bg-surface/90 backdrop-blur-sm text-text-secondary text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full">
             {product.metadata?.category ?? 'fashion'}
           </span>
         </div>
         <div className="p-4">
-          <h3 className="text-text-primary font-medium text-sm group-hover:text-gold transition-colors line-clamp-1">
+          <h3 className="text-text-primary font-medium text-sm group-hover:text-primary transition-colors line-clamp-1">
             {product.name}
           </h3>
-          <p className="text-gold font-heading text-lg mt-1">
+          <p className="text-primary font-heading text-lg mt-1">
             ${product.price.toFixed(2)}
           </p>
         </div>

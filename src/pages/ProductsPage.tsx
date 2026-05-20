@@ -39,19 +39,24 @@ export default function ProductsPage() {
   }, [products, activeCategory]);
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-10">
-      <h1 className="font-heading text-3xl text-text-primary mb-8">Collection</h1>
+    <div className="max-w-7xl mx-auto px-6 py-12">
+      <div className="mb-8">
+        <h1 className="font-heading text-4xl text-text-primary">Collection</h1>
+        <p className="text-text-secondary text-sm mt-1.5">
+          Browse the full range, or search for exactly what you have in mind.
+        </p>
+      </div>
 
       {/* Search */}
       <form onSubmit={handleSearch} className="mb-6">
-        <div className="relative max-w-md">
-          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
+        <div className="relative max-w-lg">
+          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search products..."
-            className="w-full bg-surface border border-border rounded-lg pl-10 pr-4 py-2.5 text-sm text-text-primary placeholder:text-text-secondary/50 focus:outline-none focus:border-gold/50"
+            placeholder="Try “navy blazer” or “something for a date”…"
+            className="w-full bg-surface border border-border rounded-full pl-11 pr-4 py-3 text-sm text-text-primary placeholder:text-text-secondary/60 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-soft transition"
           />
         </div>
       </form>
@@ -62,10 +67,10 @@ export default function ProductsPage() {
           <button
             key={cat}
             onClick={() => setActiveCategory(cat)}
-            className={`px-4 py-1.5 rounded-full text-xs uppercase tracking-wider transition-colors ${
+            className={`px-4 py-1.5 rounded-full text-xs font-medium uppercase tracking-wider transition-colors ${
               activeCategory === cat
-                ? 'bg-gold text-bg'
-                : 'bg-surface border border-border text-text-secondary hover:border-gold/40 hover:text-text-primary'
+                ? 'bg-primary text-white'
+                : 'bg-surface border border-border text-text-secondary hover:border-primary/50 hover:text-primary'
             }`}
           >
             {cat}
@@ -75,9 +80,24 @@ export default function ProductsPage() {
 
       {/* Grid */}
       {loading ? (
-        <div className="text-center py-16 text-text-secondary">Loading...</div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="rounded-2xl border border-border bg-surface overflow-hidden">
+              <div className="aspect-[3/4] bg-surface-soft animate-pulse" />
+              <div className="p-4 space-y-2.5">
+                <div className="h-3.5 bg-surface-soft rounded animate-pulse" />
+                <div className="h-3.5 w-1/3 bg-surface-soft rounded animate-pulse" />
+              </div>
+            </div>
+          ))}
+        </div>
       ) : (
-        <ProductGrid products={filtered} />
+        <>
+          <p className="text-text-secondary text-xs mb-4">
+            {filtered.length} {filtered.length === 1 ? 'item' : 'items'}
+          </p>
+          <ProductGrid products={filtered} />
+        </>
       )}
     </div>
   );

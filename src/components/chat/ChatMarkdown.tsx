@@ -33,22 +33,23 @@ function parseInline(text: string): ReactNode[] {
           href={match[5]}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-gold underline underline-offset-2 hover:text-gold-light transition-colors break-all"
+          className="text-primary underline underline-offset-2 hover:text-primary-dark transition-colors break-all"
         >
           {match[4]}
         </a>
       );
     } else if (match[6]) {
       nodes.push(
-        <code key={key++} className="bg-white/10 px-1 py-0.5 rounded text-[11px]">
+        <code
+          key={key++}
+          className="bg-surface-soft text-primary-dark px-1 py-0.5 rounded text-[11px]"
+        >
           {match[7]}
         </code>
       );
     } else if (match[8]) {
       const productId = match[9];
-      nodes.push(
-        <ProductIdLink key={key++} id={productId} />
-      );
+      nodes.push(<ProductIdLink key={key++} id={productId} />);
     }
 
     lastIndex = match.index + match[0].length;
@@ -67,7 +68,7 @@ function ProductIdLink({ id }: { id: string }) {
     <Link
       to={`/products/${id}`}
       onClick={toggleOpen}
-      className="text-gold underline underline-offset-2 hover:text-gold-light transition-colors"
+      className="text-primary underline underline-offset-2 hover:text-primary-dark transition-colors"
     >
       Product #{id}
     </Link>
@@ -106,7 +107,10 @@ export default function ChatMarkdown({ content }: ChatMarkdownProps) {
             <thead>
               <tr>
                 {headerCells.map((h, hi) => (
-                  <th key={hi} className="text-left px-1.5 py-1 text-gold/80 font-medium border-b border-border">
+                  <th
+                    key={hi}
+                    className="text-left px-1.5 py-1 text-primary font-semibold border-b border-border"
+                  >
                     {parseInline(h)}
                   </th>
                 ))}
@@ -114,7 +118,7 @@ export default function ChatMarkdown({ content }: ChatMarkdownProps) {
             </thead>
             <tbody>
               {bodyRows.map((row, ri) => (
-                <tr key={ri} className="border-b border-border/50 last:border-0">
+                <tr key={ri} className="border-b border-border/60 last:border-0">
                   {row.map((cell, ci) => (
                     <td key={ci} className="px-1.5 py-1 text-text-secondary align-top">
                       {parseInline(cell)}
@@ -138,7 +142,7 @@ export default function ChatMarkdown({ content }: ChatMarkdownProps) {
 
     // --- horizontal rule
     if (/^-{3,}$/.test(trimmed)) {
-      elements.push(<hr key={i} className="border-border/40 my-1.5" />);
+      elements.push(<hr key={i} className="border-border my-1.5" />);
       i++;
       continue;
     }
@@ -146,7 +150,7 @@ export default function ChatMarkdown({ content }: ChatMarkdownProps) {
     // Heading-like lines (### or ##)
     if (trimmed.startsWith('### ')) {
       elements.push(
-        <p key={i} className="font-semibold text-text-primary text-xs mt-1">
+        <p key={i} className="font-semibold text-xs mt-1">
           {parseInline(trimmed.slice(4))}
         </p>
       );
@@ -155,7 +159,7 @@ export default function ChatMarkdown({ content }: ChatMarkdownProps) {
     }
     if (trimmed.startsWith('## ')) {
       elements.push(
-        <p key={i} className="font-semibold text-text-primary text-sm mt-1">
+        <p key={i} className="font-semibold text-sm mt-1">
           {parseInline(trimmed.slice(3))}
         </p>
       );
@@ -166,7 +170,7 @@ export default function ChatMarkdown({ content }: ChatMarkdownProps) {
     // Bullet list
     if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
       elements.push(
-        <p key={i} className="pl-3 before:content-['•'] before:mr-1.5 before:text-gold/60">
+        <p key={i} className="pl-3 before:content-['•'] before:mr-1.5 before:text-primary/70">
           {parseInline(trimmed.slice(2))}
         </p>
       );
@@ -179,7 +183,7 @@ export default function ChatMarkdown({ content }: ChatMarkdownProps) {
     if (numMatch) {
       elements.push(
         <p key={i} className="pl-3">
-          <span className="text-gold/60 mr-1">{numMatch[1]}.</span>
+          <span className="text-primary/70 mr-1">{numMatch[1]}.</span>
           {parseInline(trimmed.slice(numMatch[0].length))}
         </p>
       );

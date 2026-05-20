@@ -65,28 +65,32 @@ export default function ChatMessage({ message }: ChatMessageProps) {
 
   return (
     <div className={`flex gap-2.5 ${isUser ? 'flex-row-reverse' : ''}`}>
-      <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${
-        isUser ? 'bg-gold/20 text-gold' : 'bg-surface text-text-secondary'
-      }`}>
+      <div
+        className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${
+          isUser ? 'bg-primary-soft text-primary' : 'bg-primary text-white'
+        }`}
+      >
         {isUser ? <UserIcon size={14} /> : <Bot size={14} />}
       </div>
-      <div className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
-        isUser
-          ? 'bg-gold/15 text-text-primary'
-          : 'bg-surface text-text-primary border border-border'
-      }`}>
+      <div
+        className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm ${
+          isUser
+            ? 'bg-primary text-white rounded-tr-sm'
+            : 'bg-surface text-text-primary border border-border rounded-tl-sm'
+        }`}
+      >
         {isCartAction && cartItem ? (
           <div className="flex items-start gap-2.5">
-            <div className="w-10 h-10 rounded-md bg-green-500/20 flex items-center justify-center flex-shrink-0">
-              <ShoppingCart size={16} className="text-green-400" />
+            <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
+              <ShoppingCart size={16} className="text-green-600" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 mb-0.5">
-                <Check size={12} className="text-green-400" />
-                <span className="text-xs font-medium text-green-400">Added to cart</span>
+                <Check size={12} className="text-green-600" />
+                <span className="text-xs font-medium text-green-600">Added to cart</span>
               </div>
               <p className="text-xs font-medium text-text-primary">{cartItem.product_name}</p>
-              <p className="text-xs font-heading text-gold">${cartItem.price}</p>
+              <p className="text-xs font-heading text-primary">${cartItem.price}</p>
             </div>
           </div>
         ) : products && products.length > 0 ? (
@@ -94,13 +98,16 @@ export default function ChatMessage({ message }: ChatMessageProps) {
             {/* Header */}
             <div className="flex items-center gap-1.5 mb-2">
               {isStylist ? (
-                <Sparkles size={13} className="text-gold" />
+                <Sparkles size={13} className="text-primary" />
               ) : (
-                <Package size={13} className="text-gold" />
+                <Package size={13} className="text-primary" />
               )}
-              <span className="text-xs font-medium text-gold">
+              <span className="text-xs font-semibold text-primary">
                 {isStylist
-                  ? String((message.data as Record<string, unknown>)?.outfit_name ?? 'Outfit Recommendation')
+                  ? String(
+                      (message.data as Record<string, unknown>)?.outfit_name ??
+                        'Outfit Recommendation'
+                    )
                   : `${products.length} product${products.length > 1 ? 's' : ''} found`}
               </span>
             </div>
@@ -121,7 +128,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
           <ChatMarkdown content={message.content} />
         )}
         {message.agent_used && (
-          <span className="text-[10px] text-text-secondary mt-1 block uppercase tracking-wider">
+          <span className="text-[10px] text-text-secondary mt-1.5 block uppercase tracking-wider">
             via {message.agent_used}
           </span>
         )}

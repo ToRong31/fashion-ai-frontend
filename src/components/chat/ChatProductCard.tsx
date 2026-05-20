@@ -45,7 +45,7 @@ function getGradient(color?: string, name?: string): string {
       if (lower.includes(c)) return g;
     }
   }
-  return 'from-gray-800 to-gray-600';
+  return 'from-stone-300 to-stone-200';
 }
 
 interface ChatProductCardProps {
@@ -60,20 +60,21 @@ export default function ChatProductCard({ product }: ChatProductCardProps) {
     <Link
       to={`/products/${product.id}`}
       onClick={toggleOpen}
-      className="block rounded-lg overflow-hidden border border-border hover:border-gold/40 transition-all duration-200 group"
+      className="block rounded-xl overflow-hidden border border-border hover:border-primary/40 hover:shadow-md transition-all duration-200 group bg-surface"
     >
       {/* Product image */}
       <div className={`aspect-[4/3] bg-gradient-to-br ${gradient} relative flex items-end p-2`}>
-        <span className="text-white/50 text-[9px] uppercase tracking-widest">
+        <div className="absolute inset-0 ring-1 ring-inset ring-black/5" />
+        <span className="relative text-white/70 text-[9px] uppercase tracking-widest">
           {product.category ?? 'fashion'}
         </span>
       </div>
       {/* Info */}
-      <div className="px-2 py-1.5 bg-surface">
-        <p className="text-[11px] font-medium text-text-primary group-hover:text-gold transition-colors truncate">
+      <div className="px-2 py-1.5">
+        <p className="text-[11px] font-medium text-text-primary group-hover:text-primary transition-colors truncate">
           {product.name}
         </p>
-        <p className="text-[11px] font-heading text-gold">{product.price}</p>
+        <p className="text-[11px] font-heading text-primary">{product.price}</p>
       </div>
     </Link>
   );
